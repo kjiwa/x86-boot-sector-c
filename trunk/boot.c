@@ -61,18 +61,19 @@ typedef struct
 	uint32_t size;
 } __attribute__ ((packed)) entry_t;
 
-uint8_t* _buffer = (uint8_t*) 0x0500;
-boot_t*  _bs     = (boot_t*)  0x7c00;
-FILE*    _disk   = (FILE*)    0x7e00;
-
-uint8_t _size;
+const uint8_t*      _buffer = (const uint8_t*)      0x0500;
+const boot_t* const _bs     = (const boot_t* const) 0x7c00;
+FILE*               _disk   = (FILE*)               0x7e00;
+uint8_t             _size;
+entry_t*            _entry;
+const int8_t* const _io_bin = "IO      SYS";
 
 int8_t
-strncmp(const char* str1, const char* str2, uint8_t count)
+strncmp()
 {
 	uint8_t i;
-	for (i = 0; i < count - 1 && str1[i] && str2[i] && str1[i] == str2[i]; ++i);
-	return str1[i] - str2[i];
+	for (i = 0; i < 10 && ((int8_t*) _entry)[i] && ((int8_t*) _entry)[i] == _io_bin[i]; ++i);
+	return ((int8_t*) _entry)[i] - _io_bin[i];
 }
 
 void
@@ -89,18 +90,16 @@ read()
 void
 start()
 {
-	entry_t* entry;
-
 	asm ("int $0x0013" : "=c"(_disk->sectors) : "a"(0x0800), "d"(_DRIVE_INDEX));
-	_disk->sectors &= 0b0000000000111111;
+	_disk->sectors &= 0b00111111;
 
 	_disk->lba = _bs->reserved_sectors + (_bs->fats * _bs->sectors_per_fat);
 	_size = _bs->root_entries * sizeof(entry_t) / _bs->bytes_per_sector;
 	read();
 
-	for (entry = (entry_t*) _buffer; ; ++entry)
-		if (strncmp(entry->filename, "IO      COM", 11) == 0) {
-			_disk->lba += _size + (entry->cluster - 2) * _bs->sectors_per_cluster;
+	for (_entry = (entry_t*) _buffer; ; ++_entry)
+		if (strncmp() == 0) {
+			_disk->lba += _size + (_entry->cluster - 2) * _bs->sectors_per_cluster;
 			_size = 3;
 			read();
 			asm ("jmpl $0x0050, $0x0000");

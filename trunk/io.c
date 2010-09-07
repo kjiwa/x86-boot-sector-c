@@ -1,5 +1,5 @@
 asm (".code16gcc");
-asm ("jmp _start");
+asm ("jmp start");
 
 void
 putchar(char c)
@@ -15,8 +15,8 @@ puts(char* s)
 }
 
 void
-_start()
+start()
 {
-	puts("IO.COM\r\n");
+	puts("IO.SYS\r\n");
 	while (1);
 }
