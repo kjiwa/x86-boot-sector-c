@@ -24,7 +24,7 @@ typedef struct
 	uint16_t total_sectors;
 	uint8_t  media_descriptor;
 	uint16_t sectors_per_fat;
-	uint16_t spt;
+	uint16_t sectors_per_track;
 	uint16_t heads;
 	uint32_t hidden_sectors;
 	uint32_t total_sectors2;
@@ -40,8 +40,6 @@ typedef struct
 
 typedef struct
 {
-	uint32_t lba;
-	uint8_t  heads;
 	uint8_t  sectors;
 } FILE;
 
@@ -64,7 +62,10 @@ typedef struct
 
 boot_t* _bs = (boot_t*) 0x7c00;
 FILE* _disk = (FILE*) 0x7e00;
-uint8_t* _buf = (uint8_t*) 0x0500;
+uint8_t* _buffer = (uint8_t*) 0x0500;
+
+uint32_t _lba;
+uint8_t _size;
 
 int8_t
 strncmp(const int8_t* str1, const int8_t* str2, uint16_t count)
@@ -75,37 +76,35 @@ strncmp(const int8_t* str1, const int8_t* str2, uint16_t count)
 }
 
 void
-read(uint8_t* buffer, uint32_t lba, uint8_t size)
+read()
 {
-	uint32_t t = _disk->heads * _disk->sectors;
-	uint16_t c = lba / t;
-	uint16_t h = (lba % t) / _disk->sectors;
+	uint32_t t = _bs->heads * _disk->sectors;
+	uint16_t c = _lba / t;
+	uint16_t h = (_lba % t) / _disk->sectors;
 	c <<= 8;
-	c |= ((lba % t) % _disk->sectors) + 1;
-	asm ("int $0x0013" : : "a"(0x0200 | size), "c"(c), "d"((h << 8) | _DRIVE_INDEX), "b"(buffer));
+	c |= ((_lba % t) % _disk->sectors) + 1;
+	asm ("int $0x0013" : : "a"(0x0200 | _size), "c"(c), "d"((h << 8) | _DRIVE_INDEX), "b"(_buffer));
 }
 
 void
 start()
 {
 	entry_t* entry;
-	uint16_t cx, dx;
-	uint8_t size;
-	uint32_t lba;
+	uint16_t cx;
 
-	size = _bs->root_entries * sizeof(entry_t) / _bs->bytes_per_sector;
-	lba = _bs->reserved_sectors + (_bs->fats * _bs->sectors_per_fat);
+	_size = _bs->root_entries * sizeof(entry_t) / _bs->bytes_per_sector;
+	_lba = _bs->reserved_sectors + (_bs->fats * _bs->sectors_per_fat);
 
-	asm ("int $0x0013" : "=c"(cx), "=d"(dx) : "a"(0x0800), "d"(_DRIVE_INDEX));
-	_disk->sectors = cx & 0x003f;
-	_disk->heads = dx >> 8;
+	asm ("int $0x0013" : "=c"(cx) : "a"(0x0800), "d"(_DRIVE_INDEX));
+	_disk->sectors = cx & 0b0000000000111111;
 
-	read(_buf, lba, size);
+	read();
 
-	for (entry = (entry_t*) _buf; ; ++entry)
-		if (strncmp(entry->filename, "IO ", 3) == 0) {
-			lba += size + (entry->cluster - 2) * _bs->sectors_per_cluster;
-			read(_buf, lba, 3);
-			asm ("jmp 0x0500");
+	for (entry = (entry_t*) _buffer; ; ++entry)
+		if (strncmp(entry->filename, "IO      COM", 11) == 0) {
+			_lba += _size + (entry->cluster - 2) * _bs->sectors_per_cluster;
+			_size = 3;
+			read();
+			asm ("jmpl $0x0050, $0x0000");
 		}
 }
