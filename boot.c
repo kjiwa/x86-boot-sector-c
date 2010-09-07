@@ -61,9 +61,9 @@ typedef struct
 	uint32_t size;
 } __attribute__ ((packed)) entry_t;
 
-const uint8_t*      _buffer = (const uint8_t*)      0x0500;
-const boot_t* const _bs     = (const boot_t* const) 0x7c00;
-FILE*               _disk   = (FILE*)               0x7e00;
+const uint8_t*      _buffer = (uint8_t*) 0x0500;
+const boot_t* const _bs     = (boot_t*)  0x7c00;
+FILE*               _disk   = (FILE*)    0x7e00;
 uint8_t             _size;
 entry_t*            _entry;
 const int8_t* const _io_bin = "IO      SYS";
