@@ -34,13 +34,14 @@ typedef struct
 	uint32_t id;
 	int8_t   label[11];
 	int8_t   type[8];
-	int8_t   _c[448];
+	uint8_t  _c[448];
 	uint16_t sig;
 } __attribute__ ((packed)) boot_t;
 
 typedef struct
 {
 	uint8_t  sectors;
+	uint32_t lba;
 } FILE;
 
 typedef struct
@@ -60,17 +61,16 @@ typedef struct
 	uint32_t size;
 } __attribute__ ((packed)) entry_t;
 
-boot_t* _bs = (boot_t*) 0x7c00;
-FILE* _disk = (FILE*) 0x7e00;
 uint8_t* _buffer = (uint8_t*) 0x0500;
+boot_t*  _bs     = (boot_t*)  0x7c00;
+FILE*    _disk   = (FILE*)    0x7e00;
 
-uint32_t _lba;
 uint8_t _size;
 
 int8_t
-strncmp(const int8_t* str1, const int8_t* str2, uint16_t count)
+strncmp(const char* str1, const char* str2, uint8_t count)
 {
-	uint16_t i;
+	uint8_t i;
 	for (i = 0; i < count - 1 && str1[i] && str2[i] && str1[i] == str2[i]; ++i);
 	return str1[i] - str2[i];
 }
@@ -79,10 +79,10 @@ void
 read()
 {
 	uint32_t t = _bs->heads * _disk->sectors;
-	uint16_t c = _lba / t;
-	uint16_t h = (_lba % t) / _disk->sectors;
+	uint16_t c = _disk->lba / t;
+	uint16_t h = (_disk->lba % t) / _disk->sectors;
 	c <<= 8;
-	c |= ((_lba % t) % _disk->sectors) + 1;
+	c |= ((_disk->lba % t) % _disk->sectors) + 1;
 	asm ("int $0x0013" : : "a"(0x0200 | _size), "c"(c), "d"((h << 8) | _DRIVE_INDEX), "b"(_buffer));
 }
 
@@ -90,19 +90,17 @@ void
 start()
 {
 	entry_t* entry;
-	uint16_t cx;
 
+	asm ("int $0x0013" : "=c"(_disk->sectors) : "a"(0x0800), "d"(_DRIVE_INDEX));
+	_disk->sectors &= 0b0000000000111111;
+
+	_disk->lba = _bs->reserved_sectors + (_bs->fats * _bs->sectors_per_fat);
 	_size = _bs->root_entries * sizeof(entry_t) / _bs->bytes_per_sector;
-	_lba = _bs->reserved_sectors + (_bs->fats * _bs->sectors_per_fat);
-
-	asm ("int $0x0013" : "=c"(cx) : "a"(0x0800), "d"(_DRIVE_INDEX));
-	_disk->sectors = cx & 0b0000000000111111;
-
 	read();
 
 	for (entry = (entry_t*) _buffer; ; ++entry)
 		if (strncmp(entry->filename, "IO      COM", 11) == 0) {
-			_lba += _size + (entry->cluster - 2) * _bs->sectors_per_cluster;
+			_disk->lba += _size + (entry->cluster - 2) * _bs->sectors_per_cluster;
 			_size = 3;
 			read();
 			asm ("jmpl $0x0050, $0x0000");
