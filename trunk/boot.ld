@@ -17,7 +17,7 @@ SECTIONS
 		SHORT(0xaa55);
 	}
 
-  /DISCARD/ :
+	/DISCARD/ :
 	{
 		*(.eh_frame);
 	}
