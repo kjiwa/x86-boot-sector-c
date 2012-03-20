@@ -11,4 +11,9 @@ SECTIONS
 	{
 		*(.rodata);
 	}
+
+	/DISCARD/ :
+	{
+		*(.eh_frame);
+	}
 }
