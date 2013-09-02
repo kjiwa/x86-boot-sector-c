@@ -1,6 +1,6 @@
 asm (".code16gcc");
 
-asm ("jmp start");
+asm ("jmp _start");
 asm (".space 0x0021");
 asm (".byte 0x80");
 asm (".space 0x001c");
@@ -59,23 +59,23 @@ typedef struct
 	u32_t size;
 } __attribute__ ((packed)) entry_t;
 
-const boot_t* const _bs     = (boot_t*) 0x7c00;
-FILE*               _disk   = (FILE*)   0x7e00;
-const s8_t* const   _io_bin = "IO      SYS";
+boot_t const*  _bs     = (boot_t*) 0x7c00;
+FILE*          _disk   = (FILE*)   0x7e00;
+s8_t const*    _io_bin = "IO      SYS";
 
-u8_t*               _buffer;
-u8_t                _size;
-entry_t*            _entry;
+u8_t*          _buffer;
+u8_t           _size;
+entry_t const* _entry;
 
 s8_t
 iosyscmp()
 {
-	u8_t i;
+	u16_t i;
 	for (i = 0; i < 10 && ((s8_t*) _entry)[i] && ((s8_t*) _entry)[i] == _io_bin[i]; ++i);
 	return ((s8_t*) _entry)[i] - _io_bin[i];
 }
 
-void
+u16_t
 read()
 {
 	u32_t t = _bs->heads * _disk->sectors;
@@ -83,13 +83,14 @@ read()
 	u16_t h = (_disk->lba % t) / _disk->sectors;
 	c <<= 8;
 	c |= ((_disk->lba % t) % _disk->sectors) + 1;
-	asm ("int $0x13" : : "a"(0x0200 | _size), "c"(c), "d"((h << 8) | 0x80), "b"(_buffer));
+	asm ("int $0x13" : : "a"(0x0200 | _size), "b"(_buffer), "c"(c), "d"((h << 8) | 0x0080));
+	return 0;
 }
 
-void
-start()
+u16_t
+_start()
 {
-	asm ("int $0x13" : "=c"(_disk->sectors) : "a"(0x0800), "d"(0x80));
+	asm ("int $0x13" : "=c"(_disk->sectors) : "a"(0x0800), "d"(0x80) : "bx");
 	_disk->sectors &= 0b00111111;
 
 	_buffer = (u8_t*) 0x0500;
@@ -103,6 +104,8 @@ start()
 			_disk->lba += _size + (_entry->cluster - 2) * _bs->sectors_per_cluster;
 			_size = 3;
 			read();
-			asm ("jmpl $0x0070, $0x0000");
+			asm ("jmpw %0, %1" : : "g"(0x0000), "g"(0x0700));
 		}
+
+	return 0;
 }

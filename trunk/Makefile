@@ -6,17 +6,17 @@ clean:
 	rm -rf *~ *.o *.elf boot io.sys c.img
 
 boot.o: boot.c
-	$(CC) $(CFLAGS) -Os -fno-builtin-strncmp -c -o $@ $^
+	$(CC) $(CFLAGS) -Os -m32 -c -o $@ $^
 
 io.o: io.c
-	$(CC) $(CFLAGS) -O -fno-builtin-puts -fno-builtin-putchar -c -o $@ $^
+	$(CC) $(CFLAGS) -O -fno-builtin -m32 -c -o $@ $^
 
 boot: boot.o
-	$(LD) $(LDFLAGS) -T boot.ld -o $@.elf $^
+	$(LD) $(LDFLAGS) -T boot.ld -melf_i386 -o $@.elf $^
 	objcopy -O binary $@.elf $@
 
 io: io.o
-	$(LD) $(LDFLAGS) -T io.ld -o $@.elf $^
+	$(LD) $(LDFLAGS) -T io.ld -melf_i386 -o $@.elf $^
 	objcopy -O binary $@.elf $@.sys
 
 disk:
