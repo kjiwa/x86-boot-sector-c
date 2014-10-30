@@ -123,31 +123,31 @@ typedef struct
  * A pointer to the boot sector. After the BIOS POST, the boot sector is loaded
  * into memory at 0x7c00.
  */
-boot_t const*  _bs     = (boot_t*) 0x7c00;
+boot_t const* _bs = (boot_t*) 0x7c00;
 
 /**
  * A pointer to the hard disk drive information. We use 0x7e00, the first block
  * of available memory next to the boot sector.
  */
-FILE*          _disk   = (FILE*)   0x7e00;
+FILE* _disk = (FILE*) 0x7e00;
 
 /**
  * A constant containing the name of the binary used to initialize the system
  * and device drivers. This is typically IO.SYS or IBMBIO.COM.
  */
-s8_t const*    _io_bin = "IO      SYS";
+s8_t const* _io_bin = "IO      SYS";
 
 /**
  * A pointer to a general-purpose buffer in memory. Used to store the root
  * directory entries and the first 3 sectors of IO.SYS.
  */
-u8_t*          _buffer;
+u8_t* _buffer;
 
 /**
- * A variable used by the _read() method to indicate how many sectors to read
+ * A variable used by the read() method to indicate how many sectors to read
  * from the hard disk into memory.
  */
-u8_t           _size;
+u8_t _size;
 
 /**
  * A pointer to the root directory entry currently being read.
