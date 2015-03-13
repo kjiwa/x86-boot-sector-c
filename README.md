@@ -16,7 +16,7 @@ $ make disk      # create a 10 MB disk image with a FAT volume
 $ make deploy    # copy the boot sector and IO.SYS to the disk image
 ```
 
-It works like this:
+It works like this at a high level:
 
 * get the drive parameters
 * load the contents of the root directory into memory
@@ -26,3 +26,10 @@ It works like this:
 Check [here](http://www.crimsonglow.ca/~kjiwa/x86-dos-boot-sector-in-c.html) for a more in-depth description of what's going on.
 
 [View](boot.c) the source.
+
+##### External Links #####
+
+* [SYS.COM Requirements in MS-DOS versions 2.0-6.0](http://support.microsoft.com/en-us/kb/66530/en-us)
+* [int 13](http://www.ctyme.com/intr/int-13.htm)
+* [Memory Map (x86)](http://wiki.osdev.org/Memory_Map_%28x86%29)
+* [File Allocation Table](http://en.wikipedia.org/wiki/File_Allocation_Table)
