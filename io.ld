@@ -1,19 +1,19 @@
 SECTIONS
 {
-	. = 0x0700;
+  . = 0x0700;
 
-	.cseg :
-	{
-		*(.text);
-	}
+  .cseg :
+  {
+    *(.text);
+  }
 
-	.dseg :
-	{
-		*(.rodata);
-	}
+  .dseg :
+  {
+    *(.rodata);
+  }
 
-	/DISCARD/ :
-	{
-		*(.eh_frame);
-	}
+  /DISCARD/ :
+  {
+    *(.eh_frame);
+  }
 }
