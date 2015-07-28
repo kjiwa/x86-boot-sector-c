@@ -1,6 +1,6 @@
 # DOS Boot Sector
 
-This is an x86 boot sector written in C. It is meant to bootstrap a DOS system on a FAT volume. A more detailed explanation of the code is available at https://www.crimsonglow.ca/~kjiwa/#/dos-boot-sector.
+This is an x86 boot sector written in C. It is meant to bootstrap a DOS system on a FAT volume. A more detailed explanation of the code is available at https://crimsonglow.ca/~kjiwa/#/dos-boot-sector.
 
 [View](boot.c) the source. It works like this at a high level:
 
