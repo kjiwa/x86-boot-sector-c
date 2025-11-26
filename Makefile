@@ -21,16 +21,10 @@ io: io.o
 
 disk:
 	dd if=/dev/zero of=c.img bs=512 count=20160
-	sudo losetup /dev/loop0 c.img
-	sudo mkfs.vfat /dev/loop0
-	sudo losetup -d /dev/loop0
+	mkfs.vfat c.img
 
 deploy: disk boot io
 	dd if=boot of=c.img bs=1 count=3 conv=notrunc
 	dd if=boot of=c.img skip=36 seek=36 bs=1 count=1 conv=notrunc
 	dd if=boot of=c.img skip=62 seek=62 bs=1 count=450 conv=notrunc
-	sudo losetup /dev/loop0 c.img
-	sudo mount -t vfat /dev/loop0 /mnt/c.img
-	sudo cp io.sys /mnt/c.img/io.sys
-	sudo umount /mnt/c.img
-	sudo losetup -d /dev/loop0
+	mcopy -i c.img io.sys ::io.sys
