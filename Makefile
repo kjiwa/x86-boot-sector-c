@@ -6,7 +6,7 @@ clean:
 	rm -rf *~ *.o *.elf boot io.sys c.img
 
 boot.o: boot.c
-	$(CC) $(CFLAGS) -Os -m32 -c -o $@ $^
+	$(CC) $(CFLAGS) -Os -m32 -fno-pic -c -o $@ $^
 
 io.o: io.c
 	$(CC) $(CFLAGS) -O -fno-builtin -m32 -c -o $@ $^
