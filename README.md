@@ -11,18 +11,18 @@ This is an x86 boot sector written in C. It is meant to bootstrap a DOS system o
 
 I've successfully compiled and tested it with the following tools:
 
-* gcc 4.4.3
-* binutils 2.20.1
-* dosfstools 3.0.7
-* bochs 2.4.2
+* gcc 12.2.0
+* binutils 2.40
+* dosfstools 4.2
+* bochs 2.7
 
 The gcc and binutils host and target are both i386-pc-elf.
 
 ```shell
-$ make boot      # compile and link the boot sector
-$ make io        # compile and link IO.SYS
-$ make disk      # create a 10 MB disk image with a FAT volume
-$ make deploy    # copy the boot sector and IO.SYS to the disk image
+$ make boot    # compile and link the boot sector
+$ make io.sys  # compile and link IO.SYS
+$ make c.img   # create a 10 MB disk image with a FAT volume, boot sector, and IO.SYS
+$ make run     # runs Bochs
 ```
 
 ##### External Links #####
