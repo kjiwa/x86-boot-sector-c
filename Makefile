@@ -3,7 +3,7 @@ CFLAGS=-Wall
 all:
 
 clean:
-	rm -rf *~ *.o *.elf boot io.sys c.img
+	rm -rf *~ *.o *.elf boot io.sys c.img bochsout.txt
 
 boot.o: boot.c
 	$(CC) $(CFLAGS) -Os -m32 -fno-pic -c -o $@ $^
@@ -24,7 +24,7 @@ disk:
 	mkfs.vfat c.img
 
 deploy: disk boot io
-	dd if=boot of=c.img bs=1 count=3 conv=notrunc
-	dd if=boot of=c.img skip=36 seek=36 bs=1 count=1 conv=notrunc
-	dd if=boot of=c.img skip=62 seek=62 bs=1 count=450 conv=notrunc
+	dd if=boot of=c.img bs=1 count=3 conv=notrunc                    # JMP instruction
+	printf '\x80' | dd of=c.img seek=36 bs=1 count=1 conv=notrunc    # Drive index (0x80)
+	dd if=boot of=c.img skip=62 seek=62 bs=1 count=450 conv=notrunc  # Skip BPB and write boot sector code
 	mcopy -i c.img io.sys ::io.sys

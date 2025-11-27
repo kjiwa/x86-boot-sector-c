@@ -1,22 +1,15 @@
-asm (".code16gcc");
-asm ("jmp start");
+asm(".code16gcc");
+asm("jmp start");
 
-void
-putchar(char c)
-{
-  asm ("int $0x0010" : : "a"(0x0e00 | c));
-}
+void putchar(char c) { asm("int $0x0010" : : "a"(0x0e00 | c)); }
 
-void
-puts(char* s)
-{
+void puts(char *s) {
   for (; *s; ++s)
     putchar(*s);
 }
 
-void
-start()
-{
+void start() {
   puts("IO.SYS\r\n");
-  while (1);
+  while (1)
+    ;
 }
