@@ -1,0 +1,8 @@
+bochsout.txt
+boot
+boot.elf
+boot.o
+c.img
+io.elf
+io.o
+io.sys
