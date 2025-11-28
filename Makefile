@@ -1,5 +1,4 @@
 .POSIX:
-.SUFFIXES:
 .SUFFIXES: .c .o .elf
 
 # Tools
