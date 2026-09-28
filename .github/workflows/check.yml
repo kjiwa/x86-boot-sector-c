@@ -1,0 +1,12 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy:
+    uses: kjiwa/.github/.github/workflows/privacy.yml@main
